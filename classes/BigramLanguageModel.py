@@ -41,7 +41,7 @@ class BigramLanguageModel(nn.Module):
         for _ in range(max_new_tokens):
             logits, _ = self.forward(idx)
             logits = logits[:, -1, :] # last character's logits
-            probs = F.softmax(logits, dim=-1)
+            probs = F.softmax(logits, dim=-1) # randomly picks token indices based on the given probabilities (adds randomness to generation)
             idx_next = torch.multinomial(probs, num_samples=1)
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
