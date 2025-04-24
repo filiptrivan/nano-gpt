@@ -113,3 +113,9 @@ def intuition_test(input: str):
     print(decode(prediction[0].tolist()))
 
 #endregion
+
+#region Mathematical tric in the heart of the self-attention
+
+
+
+#endregion

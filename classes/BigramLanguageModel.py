@@ -3,11 +3,15 @@ import torch.nn as nn
 from torch.nn import functional as F
 torch.manual_seed(1111)
 
+n_embd = 32
+
 class BigramLanguageModel(nn.Module):
 
     def __init__(self, vocab_size):
         super().__init__()
-        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size) # Language modeling head
 
     def forward(self, idx, targets=None):
         # FT: idx example (every single number will get it's corresponding logits): [
@@ -17,7 +21,8 @@ class BigramLanguageModel(nn.Module):
         #   [7, 2, 0, 3, 15, 51, 14, 4]
         # ]
         # FT: If we pass 0 (eg. 'A'), we will get logits (posibility scores for the next word) for the first row.
-        logits = self.token_embedding_table(idx) # [B (batch=4), T (time=8), C (channels=vocab_size)]
+        tok_emb = self.token_embedding_table(idx) # [B (batch=4), T (time=8), C (channels)]
+        logits = self.lm_head(tok_emb) # [B (batch=4), T (time=8), vocab_size]
 
         if targets is None:
             loss = None
