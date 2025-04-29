@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
+from classes.Head import Head
 torch.manual_seed(1111)
 
 n_embd = 32
@@ -9,8 +10,10 @@ class BigramLanguageModel(nn.Module):
 
     def __init__(self, vocab_size, block_size):
         super().__init__()
+        self.block_size = block_size
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        self.sa_head = Head(n_embd, n_embd, block_size)
         self.lm_head = nn.Linear(n_embd, vocab_size) # Language modeling head
 
     def forward(self, idx, targets=None):
@@ -27,6 +30,7 @@ class BigramLanguageModel(nn.Module):
         tok_emb = self.token_embedding_table(idx) # [B (batch=4), T (time=8), C (channels)]
         pos_emb = self.position_embedding_table(torch.arange(T)) # [T, C]
         x = tok_emb + pos_emb
+        x = self.sa_head(x) # Applit one head of self-attention [B, T, C]
         logits = self.lm_head(x) # [B (batch=4), T (time=8), vocab_size]
 
         if targets is None:
@@ -49,7 +53,8 @@ class BigramLanguageModel(nn.Module):
     
     def generate(self, idx, max_new_tokens):
         for _ in range(max_new_tokens):
-            logits, _ = self.forward(idx)
+            idx_cond = idx[:, -self.block_size:] # FT: Skip the first block_size
+            logits, _ = self.forward(idx_cond)
             logits = logits[:, -1, :] # last character's logits
             probs = F.softmax(logits, dim=-1) # randomly picks token indices based on the given probabilities (adds randomness to generation)
             idx_next = torch.multinomial(probs, num_samples=1)

@@ -68,14 +68,6 @@ def estimate_loss():
     model.train()
     return out
 
-# xb, yb = get_batch('train')
-
-# for b in range(batch_size):
-#     for t in range(block_size):
-#         context = xb[b, :t+1]
-#         target = yb[b, t]
-#         print(f'When input is {context.tolist()} the target is {target}')
-
 #endregion
 
 #region BigramLM
@@ -84,7 +76,7 @@ def estimate_loss():
 # Bigram is the (char1, char2) tuple
 from classes.BigramLanguageModel import BigramLanguageModel
 
-model = BigramLanguageModel(vocab_size)
+model = BigramLanguageModel(vocab_size, block_size)
 
 optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
