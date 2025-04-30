@@ -30,7 +30,7 @@ class BigramLanguageModel(nn.Module):
         tok_emb = self.token_embedding_table(idx) # [B (batch=4), T (time=8), C (channels)]
         pos_emb = self.position_embedding_table(torch.arange(T)) # [T, C]
         x = tok_emb + pos_emb
-        x = self.sa_head(x) # Applit one head of self-attention [B, T, C]
+        x = self.sa_head.forward(x) # Apply one head of self-attention [B, T, C]
         logits = self.lm_head(x) # [B (batch=4), T (time=8), vocab_size]
 
         if targets is None:
