@@ -53,10 +53,10 @@ class BigramLanguageModel(nn.Module):
     
     def generate(self, idx, max_new_tokens):
         for _ in range(max_new_tokens):
-            idx_cond = idx[:, -self.block_size:] # FT: Skip the first block_size
+            idx_cond = idx[:, -self.block_size:] # Pick the last block_size tokens to feed the model
             logits, _ = self.forward(idx_cond)
             logits = logits[:, -1, :] # last character's logits
-            probs = F.softmax(logits, dim=-1) # randomly picks token indices based on the given probabilities (adds randomness to generation)
-            idx_next = torch.multinomial(probs, num_samples=1)
+            probs = F.softmax(logits, dim=-1) 
+            idx_next = torch.multinomial(probs, num_samples=1) # randomly picks token indices based on the given probabilities (adds randomness to generation)
             idx = torch.cat((idx, idx_next), dim=1)
         return idx
