@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from classes.Head import Head
+from classes.MultiHeadAttention import MultiHeadAttention
 torch.manual_seed(1111)
 
 n_embd = 32
@@ -13,7 +14,7 @@ class BigramLanguageModel(nn.Module):
         self.block_size = block_size
         self.token_embedding_table = nn.Embedding(vocab_size, n_embd)
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
-        self.sa_head = Head(n_embd, n_embd, block_size)
+        self.sa_heads = MultiHeadAttention(4, n_embd//4, n_embd, block_size)
         self.lm_head = nn.Linear(n_embd, vocab_size) # Language modeling head
 
     def forward(self, idx, targets=None):
@@ -30,7 +31,7 @@ class BigramLanguageModel(nn.Module):
         tok_emb = self.token_embedding_table(idx) # [B (batch=4), T (time=8), C (channels)]
         pos_emb = self.position_embedding_table(torch.arange(T)) # [T, C]
         x = tok_emb + pos_emb
-        x = self.sa_head.forward(x) # Apply one head of self-attention [B, T, C]
+        x = self.sa_heads.forward(x) # Apply multiple heads of self-attention [B, T, C]
         logits = self.lm_head(x) # [B (batch=4), T (time=8), vocab_size]
 
         if targets is None:
