@@ -7,7 +7,7 @@ from classes.Head import Head
 from classes.MultiHeadAttention import MultiHeadAttention
 torch.manual_seed(1111)
 
-n_embd = 32
+n_embd = 128
 
 class BigramLanguageModel(nn.Module):
 
@@ -19,7 +19,8 @@ class BigramLanguageModel(nn.Module):
         self.blocks = nn.Sequential(
             Block(n_embd, block_size, n_head=4),
             Block(n_embd, block_size, n_head=4),
-            Block(n_embd, block_size, n_head=4)
+            Block(n_embd, block_size, n_head=4),
+            nn.LayerNorm(n_embd)
         )
         self.lm_head = nn.Linear(n_embd, vocab_size) # Language modeling head
 

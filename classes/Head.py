@@ -13,6 +13,8 @@ class Head(nn.Module):
 
         self.register_buffer('tril', torch.tril(torch.ones(block_size, block_size)))
 
+        self.dropout = nn.Dropout(0.2)
+
     def forward(self, x):
         B, T, C = x.shape
         # The nn.Linear layer is applied independently to each 32-dimensional token vector inside the tensor x
@@ -26,6 +28,8 @@ class Head(nn.Module):
 
         # FT: As we use bigger and bigger decay for softmax, lets say * 8, softmax will sharpen, and make one hot encoding.
         wei = F.softmax(wei, dim=-1)
+
+        wei = self.dropout(wei)
 
         out = wei @ v
 
